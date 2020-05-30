@@ -8,18 +8,30 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://www.kcn.me">
-  <title>Archives: 2020/5 | KCN的主页</title>
+  <title>Opencore的config.plist文件校验 | KCN的主页</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="KCN的主页">
-<meta property="og:url" content="https://www.kcn.me/archives/2020/05/index.html">
+  <meta name="description" content="&amp;#8195;&amp;#8195;因为10.15.4版本带来休眠唤醒之后1-2分钟之后会僵死的问题，需要升级OpenCore到0.5.7+。每次升级OpenCore都胆战心惊的，因为配置项每个版本都有变化，基本肯定起不来。而一个一个去查Differences.pdf太难了。今天找到一个网站校验opencore的config.plist的，强力推荐：Sanity check your OpenCore c">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Opencore的config.plist文件校验">
+<meta property="og:url" content="https://www.kcn.me/2020/05/31/opencore-config-plist-verify/index.html">
 <meta property="og:site_name" content="KCN的主页">
+<meta property="og:description" content="&amp;#8195;&amp;#8195;因为10.15.4版本带来休眠唤醒之后1-2分钟之后会僵死的问题，需要升级OpenCore到0.5.7+。每次升级OpenCore都胆战心惊的，因为配置项每个版本都有变化，基本肯定起不来。而一个一个去查Differences.pdf太难了。今天找到一个网站校验opencore的config.plist的，强力推荐：Sanity check your OpenCore c">
 <meta property="og:locale" content="zh">
+<meta property="og:image" content="https://www.kcn.me/2020/05/31/opencore-config-plist-verify/1.png">
+<meta property="og:image" content="https://www.kcn.me/2020/05/31/opencore-config-plist-verify/right.png">
+<meta property="og:image" content="https://www.kcn.me/2020/05/31/opencore-config-plist-verify/check.png">
+<meta property="og:image" content="https://www.kcn.me/2020/05/31/opencore-config-plist-verify/default.png">
+<meta property="og:image" content="https://www.kcn.me/2020/05/31/opencore-config-plist-verify/missitem.png">
+<meta property="og:image" content="https://www.kcn.me/2020/05/31/opencore-config-plist-verify/misssection.png">
+<meta property="og:image" content="https://www.kcn.me/2020/05/31/opencore-config-plist-verify/deprecated.png">
+<meta property="article:published_time" content="2020-05-30T17:45:46.000Z">
+<meta property="article:modified_time" content="2020-05-30T18:04:25.274Z">
 <meta property="article:author" content="KCN">
 <meta property="article:tag" content="kbs">
 <meta property="article:tag" content="smth">
 <meta property="article:tag" content="KCN">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.kcn.me/2020/05/31/opencore-config-plist-verify/1.png">
   
     <link rel="alternative" href="/atom.xml" title="KCN的主页" type="application/atom+xml">
   
@@ -149,76 +161,163 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
+            <article id="post-opencore-config-plist-verify" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
   
+    <h1 class="article-title" itemprop="name">
+      Opencore的config.plist文件校验
+    </h1>
   
-    
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2020" class="archive-year">2020</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2020/05/31/opencore-config-plist-verify/" class="archive-article-date">
+
+        
+        <a href="/2020/05/31/opencore-config-plist-verify/" class="archive-article-date">
   	<time datetime="2020-05-30T17:45:46.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-05-31</time>
 </a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/05/31/opencore-config-plist-verify/">Opencore的config.plist文件校验</a>
-    </h1>
-  
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>&#8195;&#8195;因为10.15.4版本带来休眠唤醒之后1-2分钟之后会僵死的问题，需要升级OpenCore到0.5.7+。每次升级OpenCore都胆战心惊的，因为配置项每个版本都有变化，基本肯定起不来。而一个一个去查Differences.pdf太难了。今天找到一个网站校验opencore的config.plist的，强力推荐：<a href="https://opencore.slowgeek.com" target="_blank" rel="noopener">Sanity check your OpenCore config.plist</a></p>
+<a id="more"></a>
 
-        <div class="article-info info-on-right">
-          
-          
+<p>首页进去</p>
+<img src="/2020/05/31/opencore-config-plist-verify/1.png" class title="home">
 
+<p>左边选择框是你的CPU型号，我的8700K选Coffee Lake，右边选择框是要升级到的Opencore版本。<br>选好之后把当前的config.plist拖进去，等一会就会显示检查结果。</p>
+<ol>
+<li><p>没问题的：</p>
+<img src="/2020/05/31/opencore-config-plist-verify/right.png" class title="right">
+</li>
+<li><p>没问题但需要检查指向的文件确实存在的:</p>
+<img src="/2020/05/31/opencore-config-plist-verify/check.png" class title="check">
+</li>
+<li><p>和建议的值不一样，需要确认的：</p>
+<img src="/2020/05/31/opencore-config-plist-verify/default.png" class title="default">
+</li>
+<li><p>缺少配置项，可以不加：</p>
+<img src="/2020/05/31/opencore-config-plist-verify/missitem.png" class title="default">
+</li>
+<li><p>缺少配置section：</p>
+<img src="/2020/05/31/opencore-config-plist-verify/misssection.png" class title="miss">
+</li>
+<li><p>已经废除的配置项，需要删掉</p>
+<img src="/2020/05/31/opencore-config-plist-verify/deprecated.png" class title="deprecated">
+
+</li>
+</ol>
+<p>一一修正了之后，一把就boot进系统了。</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+      
+
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=https://www.kcn.me/2020/05/31/opencore-config-plist-verify/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2020/05/30/catalina-ssh/" class="archive-article-date">
-  	<time datetime="2020-05-29T17:12:50.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-05-30</time>
-</a>
+<nav id="article-nav">
+  
+  
+    <a href="/2020/05/30/catalina-ssh/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">MacOs Catalina 10.15.4 后命令行ssh无法连接</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
+        
+        
+    </div>
+</aside>
+
+
+
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/05/30/catalina-ssh/">MacOs Catalina 10.15.4 后命令行ssh无法连接</a>
-    </h1>
+  
   
 
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
   
 
-    
+  
+
+  
 
 
           </div>
@@ -241,8 +340,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: true,
