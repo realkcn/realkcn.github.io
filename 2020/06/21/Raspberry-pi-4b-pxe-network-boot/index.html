@@ -8,18 +8,26 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://www.kcn.me">
-  <title>Archives | KCN的主页</title>
+  <title>Raspberry pi无盘网络启动(network booting) | KCN的主页</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="KCN的主页">
-<meta property="og:url" content="https://www.kcn.me/archives/index.html">
+  <meta name="description" content="&amp;#8195;&amp;#8195;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Raspberry pi无盘网络启动(network booting)">
+<meta property="og:url" content="https://www.kcn.me/2020/06/21/Raspberry-pi-4b-pxe-network-boot/index.html">
 <meta property="og:site_name" content="KCN的主页">
+<meta property="og:description" content="&amp;#8195;&amp;#8195;">
 <meta property="og:locale" content="zh">
+<meta property="og:image" content="https://www.kcn.me/2020/06/21/Raspberry-pi-4b-pxe-network-boot/synology-dhcp.png">
+<meta property="og:image" content="https://www.kcn.me/2020/06/21/Raspberry-pi-4b-pxe-network-boot/synology-nfs.png">
+<meta property="og:image" content="https://www.kcn.me/2020/06/21/Raspberry-pi-4b-pxe-network-boot/synology-pxe.png">
+<meta property="article:published_time" content="2020-06-20T16:15:54.000Z">
+<meta property="article:modified_time" content="2020-06-20T16:17:59.676Z">
 <meta property="article:author" content="KCN">
 <meta property="article:tag" content="kbs">
 <meta property="article:tag" content="smth">
 <meta property="article:tag" content="KCN">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.kcn.me/2020/06/21/Raspberry-pi-4b-pxe-network-boot/synology-dhcp.png">
   
     <link rel="alternative" href="/atom.xml" title="KCN的主页" type="application/atom+xml">
   
@@ -149,314 +157,200 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
+            <article id="post-Raspberry-pi-4b-pxe-network-boot" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
   
+    <h1 class="article-title" itemprop="name">
+      Raspberry pi无盘网络启动(network booting)
+    </h1>
   
-    
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2020" class="archive-year">2020</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2020/06/21/Raspberry-pi-4b-pxe-network-boot/" class="archive-article-date">
+
+        
+        <a href="/2020/06/21/Raspberry-pi-4b-pxe-network-boot/" class="archive-article-date">
   	<time datetime="2020-06-20T16:15:54.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-06-21</time>
 </a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/06/21/Raspberry-pi-4b-pxe-network-boot/">Raspberry pi无盘网络启动(network booting)</a>
-    </h1>
-  
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>&#8195;&#8195;</p>
+<!--toc-->
+<a id="more"></a>
 
-        <div class="article-info info-on-right">
-          
-          
 
+<p>&nbsp;&nbsp;家里的Dell服务器遭遇突然断电，硬盘坏了一块，加之服务器的噪音还是太大，而且上面也就跑了些简单的网络服务，实在太浪费。于是乘淘宝618买了一套Raspberry pi 4B准备替代Dell服务器做简单网络服务。据说树莓派最容易坏的就是那块sd卡，就想干脆配成无盘启动，都用家里的nas服务器做存储，一劳永逸！</p>
+<!--toc-->
+<!--more-->
+<h1><span id="升级bootloader">升级Bootloader</span></h1><p>&nbsp;&nbsp;缺省是没有network boot的，需要把network boot写到eeprom的option里面。当前的eeprom stable（2020年2月份以后的stable版本）已经支持，可以确认一下</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">root@raspberrypi:/home/kcn# vcgencmd bootloader_version</span><br><span class="line">Apr 16 2020 18:11:26</span><br><span class="line">version a5e1b95f320810c69441557c5f5f0a7f2460dfb8 (release)</span><br><span class="line">timestamp 1587057086</span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>更新boot loader的配置需要eeprom的image，随便选了个最新的(2020-06-15)</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">wget 'https://github.com/raspberrypi/rpi-eeprom/raw/master/firmware/stable/pieeprom-2020-06-15.bin'</span><br><span class="line">sudo rpi-eeprom-config pieeprom-2020-06-15.bin &gt; bootconf.txt #读缺省的配置</span><br><span class="line">sudo vi bootconf.txt #把BOOT_ORDER增加2 原来是BOOT_ORDER=0xf41 现在 BOOT_ORDER=0xf241</span><br><span class="line">sudo rpi-eeprom-config --out pieeprom-2020-06-15-netboot.bin --config bootconf.txt pieeprom-2020-06-15.bin</span><br><span class="line">sudo rpi-eeprom-update -d -f ./pieeprom-2020-06-15-netboot.bin</span><br><span class="line">sudo reboot</span><br></pre></td></tr></table></figure>
+<p>当前boot loader的配置和版本</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">root@raspberrypi:~# vcgencmd bootloader_config</span><br><span class="line">[all]</span><br><span class="line">BOOT_UART&#x3D;0</span><br><span class="line">WAKE_ON_GPIO&#x3D;1</span><br><span class="line">POWER_OFF_ON_HALT&#x3D;0</span><br><span class="line">DHCP_TIMEOUT&#x3D;45000</span><br><span class="line">DHCP_REQ_TIMEOUT&#x3D;4000</span><br><span class="line">TFTP_FILE_TIMEOUT&#x3D;30000</span><br><span class="line">ENABLE_SELF_UPDATE&#x3D;1</span><br><span class="line">DISABLE_HDMI&#x3D;0</span><br><span class="line">BOOT_ORDER&#x3D;0xf241</span><br><span class="line">root@raspberrypi:~# vcgencmd bootloader_version</span><br><span class="line">Jun 15 2020 14:36:19</span><br><span class="line">version c302dea096cc79f102cec12aeeb51abf392bd781 (release)</span><br><span class="line">timestamp 1592228179</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>记录一下本机的序列号</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">root@raspberrypi:/# vcgencmd otp_dump | grep 28: | sed s/.*://g</span><br><span class="line">57360526</span><br><span class="line"><span class="meta">#</span><span class="bash">或者用cpuinfo</span></span><br><span class="line">root@raspberrypi:/# cat /proc/cpuinfo</span><br><span class="line">....</span><br><span class="line">Hardware	: BCM2835</span><br><span class="line">Revision	: d03114</span><br><span class="line">Serial		: 1000000057360526 #最后8位</span><br><span class="line">Model		: Raspberry Pi 4 Model B Rev 1.4</span><br></pre></td></tr></table></figure>
+<p>记下57360526这个序列号，在tftp下的目录要用。</p>
+</li>
+<li><p>设置fstab</p>
+<ul>
+<li>设置/boot是远程的nfs</li>
+<li>设置log和临时放到tmpfs，可以减少系统io。当然重启就会丢..<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">root@raspberrypi:~# cat &#x2F;etc&#x2F;fstab</span><br><span class="line">proc            &#x2F;proc           proc    defaults          0       0</span><br><span class="line">192.168.2.45:&#x2F;volume1&#x2F;nfs&#x2F;tftproot&#x2F;57360526 &#x2F;boot nfs defaults,vers&#x3D;3,proto&#x3D;tcp 0 0</span><br><span class="line">tmpfs    &#x2F;tmp    tmpfs    defaults,noatime,nosuid,size&#x3D;100m    0 0</span><br><span class="line">tmpfs    &#x2F;var&#x2F;tmp    tmpfs    defaults,noatime,nosuid,size&#x3D;30m    0 0</span><br><span class="line">tmpfs    &#x2F;var&#x2F;log    tmpfs    defaults,noatime,nosuid,mode&#x3D;0755,size&#x3D;100m    0 0</span><br><span class="line">tmpfs    &#x2F;var&#x2F;run    tmpfs    defaults,noatime,nosuid,mode&#x3D;0755,size&#x3D;2m    0 0</span><br><span class="line">tmpfs    &#x2F;var&#x2F;spool&#x2F;mqueue    tmpfs    defaults,noatime,nosuid,mode&#x3D;0700,gid&#x3D;12,size&#x3D;30m    0 0</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+</li>
+</ul>
+<h1><span id="配置群晖">配置群晖</span></h1><p>  家里的群晖是兼任dhcp的，所以所有的配置都在群晖上完成。</p>
+<ul>
+<li><p>配置dhcp，给它分配固定ip</p>
+<img src="/2020/06/21/Raspberry-pi-4b-pxe-network-boot/synology-dhcp.png" class title="synology-dhcp">
+</li>
+<li><p>nfs配置<br>增加一个共享文件夹nfs，并设置nfs权限。</p>
+<img src="/2020/06/21/Raspberry-pi-4b-pxe-network-boot/synology-nfs.png" class title="synology-nfs">
+</li>
+<li><p>把当前系统拷贝到nfs里面<br>在nfs下面建了两个目录，tftproot和rpi4b-8g，分别放boot分区和根分区。</p>
+</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">mount 192.168.2.45:/volume1/nfs /mnt</span><br><span class="line">mkdir -p /mnt/rpi4b-8g</span><br><span class="line">cd /mnt/rpi4b-8g</span><br><span class="line">rsync -xa --progress --exclude /mnt / .  #同步根文件系统</span><br><span class="line">mkdir -p /mnt/tftproot/57360526 #目录名是树莓派序列号</span><br><span class="line">rsync -xa --progress /boot/* /mnt/tftproot/57360526  #同步boot目录到tftproot</span><br><span class="line">```` </span><br><span class="line"></span><br><span class="line">* 修改kernel启动参数</span><br><span class="line">````shell</span><br><span class="line"><span class="meta">#</span><span class="bash"> cat /mnt/tftproot/57360526/cmdline.txt</span></span><br><span class="line">console=serial0,115200 console=tty1 rw root=/dev/nfs nfsroot=192.168.2.45:/volume1/nfs/rpi4b-8g,v3,tcp ip=dhcp elevator=deadline rootwait</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>配置tftp<br>启用tftp服务，把tftp的根文件夹设成nfs/tftproot</p>
+</li>
+<li><p>配置pxe<br>群晖的pxe图形配置界面没法和树莓派配合，把群晖的pxe选项关闭。</p>
+<img src="/2020/06/21/Raspberry-pi-4b-pxe-network-boot/synology-pxe.png" class title="synology-pxe">
+
+<p>ssh登群晖服务器手动改配置</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"><span class="built_in">cd</span> /etc/dhcpd/</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> ls</span></span><br><span class="line">dhcpd-bond0.info          dhcpd-bond0-subnet1.conf  dhcpd-bond0-subnet3.conf  dhcpd-dns-dns.conf  dhcpd-pxe.conf        wpad-bond0.conf</span><br><span class="line">dhcpd-bond0-static.conf   dhcpd-bond0-subnet1.info  dhcpd-bond0-subnet3.info  dhcpd-dns-dns.info  dhcpd-pxe.info        wpad-bond0.info</span><br><span class="line">dhcpd-bond0-subnet0.conf  dhcpd-bond0-subnet2.conf  dhcpd.conf                dhcpd.info          dhcpd-pxe-setting</span><br><span class="line">dhcpd-bond0-subnet0.info  dhcpd-bond0-subnet2.info  dhcpd.conf.leases         dhcpd-leases.log    tmp-dhcpd-leases.log</span><br><span class="line"><span class="meta">#</span><span class="bash"> cat dhcpd-bond0-subnet3.conf</span></span><br><span class="line">interface=bond0</span><br><span class="line">pxe-service=0,"Raspberry Pi Boot"</span><br><span class="line">dhcp-range=set:bond03,192.168.2.11,192.168.2.11,255.255.255.0,600</span><br><span class="line">dhcp-option=tag:bond03,option:router,192.168.2.254</span><br><span class="line">dhcp-option=tag:bond03,option:domain-search,home.kcn.cn</span><br><span class="line">dhcp-option=tag:bond03,option:domain-name,home.kcn.cn</span><br><span class="line">dhcp-option=tag:bond03,option:dns-server,192.168.2.45,192.168.2.42</span><br></pre></td></tr></table></figure>
+<p>找到树莓派固定ip的配置文件，加上 pxe-service=0,”Raspberry Pi Boot” 这一行</p>
+</li>
+</ul>
+<h1><span id="大功告成">大功告成</span></h1><p>&nbsp;&nbsp;重启树莓派，拔掉sd卡，可以看到开始从网络启动。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">root@raspberrypi:/boot# df -h</span><br><span class="line">Filesystem                                   Size  Used Avail Use% Mounted on</span><br><span class="line">192.168.2.45:/volume1/nfs/rpi4b-8g            21T   17T  4.8T  78% /</span><br><span class="line">devtmpfs                                     3.7G     0  3.7G   0% /dev</span><br><span class="line">tmpfs                                        3.9G     0  3.9G   0% /dev/shm</span><br><span class="line">tmpfs                                        3.9G  8.5M  3.9G   1% /run</span><br><span class="line">tmpfs                                        5.0M  4.0K  5.0M   1% /run/lock</span><br><span class="line">tmpfs                                        3.9G     0  3.9G   0% /sys/fs/cgroup</span><br><span class="line">tmpfs                                        100M     0  100M   0% /tmp</span><br><span class="line">tmpfs                                         30M     0   30M   0% /var/spool/mqueue</span><br><span class="line">tmpfs                                         30M     0   30M   0% /var/tmp</span><br><span class="line">tmpfs                                        100M  180K  100M   1% /var/log</span><br><span class="line">192.168.2.45:/volume1/nfs/tftproot/57360526   21T   17T  4.8T  78% /boot</span><br><span class="line">tmpfs                                        784M     0  784M   0% /run/user/1001</span><br></pre></td></tr></table></figure>
+
+<h1><span id="troubleshooting">TroubleShooting</span></h1><ul>
+<li><p>net: down on startup screen<br>check cable</p>
+</li>
+<li><p>loop on startup screen</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">YI: 192.168.2.11</span><br><span class="line">SI: 192.168.2.45</span><br></pre></td></tr></table></figure>
+<p>Dhcp with pxe option failed.Check dnsmasq config file.</p>
+</li>
+<li><p>block after “crng init done”<br>rootfs can’t mount, check cmdline.txt on tftproot.</p>
+</li>
+</ul>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+      
+
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=https://www.kcn.me/2020/06/21/Raspberry-pi-4b-pxe-network-boot/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2020/05/31/opencore-config-plist-verify/" class="archive-article-date">
-  	<time datetime="2020-05-30T17:45:46.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-05-31</time>
-</a>
+<nav id="article-nav">
+  
+  
+    <a href="/2020/05/31/opencore-config-plist-verify/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Opencore的config.plist文件校验</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
+        
+        
+    </div>
+</aside>
+
+
+
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/05/31/opencore-config-plist-verify/">Opencore的config.plist文件校验</a>
-    </h1>
+  
   
 
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2020/05/30/catalina-ssh/" class="archive-article-date">
-  	<time datetime="2020-05-29T17:12:50.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-05-30</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/05/30/catalina-ssh/">MacOs Catalina 10.15.4 后命令行ssh无法连接</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2020/03/30/aws%E5%9F%BA%E7%A1%80%E9%85%8D%E7%BD%AE/" class="archive-article-date">
-  	<time datetime="2020-03-30T14:29:53.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-03-30</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/03/30/aws%E5%9F%BA%E7%A1%80%E9%85%8D%E7%BD%AE/">AWS LightSail简单系统设置</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2020/03/25/jq%E7%9A%84%E4%BD%BF%E7%94%A8/" class="archive-article-date">
-  	<time datetime="2020-03-25T04:23:20.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-03-25</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/03/25/jq%E7%9A%84%E4%BD%BF%E7%94%A8/">使用jq解析json</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2020/03/12/certos8-nft-firewalld/" class="archive-article-date">
-  	<time datetime="2020-03-12T08:58:55.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-03-12</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/03/12/certos8-nft-firewalld/">使用nftables的Firewalld</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2020/03/12/VMWare-vCenter-%E4%BB%8E-6-5-%E5%8D%87%E7%BA%A7%E5%88%B0-6-7/" class="archive-article-date">
-  	<time datetime="2020-03-12T08:05:07.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-03-12</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/03/12/VMWare-vCenter-%E4%BB%8E-6-5-%E5%8D%87%E7%BA%A7%E5%88%B0-6-7/">VMWare vCenter VCSA从 6.5 升级到 6.7</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">vmware</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2020/03/03/netflix/" class="archive-article-date">
-  	<time datetime="2020-03-03T12:30:14.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-03-03</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/03/03/netflix/">netflix</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2020/02/29/cisco-wlc/" class="archive-article-date">
-  	<time datetime="2020-02-29T05:48:34.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-02-29</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/02/29/cisco-wlc/">cisco wlc升级</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">cisco 家里网络</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2020/02/27/%E7%AC%AC%E4%B8%80%E7%AF%87/" class="archive-article-date">
-  	<time datetime="2020-02-27T14:21:40.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-02-27</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/02/27/%E7%AC%AC%E4%B8%80%E7%AF%87/">第一篇</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
-  
-
-    
 
 
           </div>
@@ -479,8 +373,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: true,
