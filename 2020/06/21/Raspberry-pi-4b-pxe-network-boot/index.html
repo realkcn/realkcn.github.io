@@ -21,7 +21,7 @@
 <meta property="og:image" content="https://www.kcn.me/2020/06/21/Raspberry-pi-4b-pxe-network-boot/synology-nfs.png">
 <meta property="og:image" content="https://www.kcn.me/2020/06/21/Raspberry-pi-4b-pxe-network-boot/synology-pxe.png">
 <meta property="article:published_time" content="2020-06-20T16:15:54.000Z">
-<meta property="article:modified_time" content="2020-06-20T16:21:30.053Z">
+<meta property="article:modified_time" content="2020-06-21T14:57:08.814Z">
 <meta property="article:author" content="KCN">
 <meta property="article:tag" content="kbs">
 <meta property="article:tag" content="smth">
@@ -181,13 +181,22 @@
 <!--toc-->
 <p>&nbsp;&nbsp;家里的Dell服务器遭遇突然断电，硬盘坏了一块，加之服务器的噪音还是太大，而且上面也就跑了些简单的网络服务，实在太浪费。于是乘淘宝618买了一套Raspberry pi 4B准备替代Dell服务器做简单网络服务。据说树莓派最容易坏的就是那块sd卡，就想干脆配成无盘启动，都用家里的nas服务器做存储，一劳永逸！</p>
 <a id="more"></a>
-<h1><span id="升级bootloader">升级Bootloader</span></h1><p>&nbsp;&nbsp;缺省是没有network boot的，需要把network boot写到eeprom的option里面。当前的eeprom stable（2020年2月份以后的stable版本）已经支持，可以确认一下</p>
+<h1><span id="升级bootloader">升级Bootloader</span></h1><p>&nbsp;&nbsp;树莓派缺省是没有network boot的，需要把network boot写到eeprom的option里面。当前的eeprom stable（2020年2月份以后的stable版本）已经支持，可以确认一下</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">root@raspberrypi:/home/kcn# vcgencmd bootloader_version</span><br><span class="line">Apr 16 2020 18:11:26</span><br><span class="line">version a5e1b95f320810c69441557c5f5f0a7f2460dfb8 (release)</span><br><span class="line">timestamp 1587057086</span><br></pre></td></tr></table></figure>
 <ul>
 <li><p>更新boot loader的配置需要eeprom的image，随便选了个最新的(2020-06-15)</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">wget 'https://github.com/raspberrypi/rpi-eeprom/raw/master/firmware/stable/pieeprom-2020-06-15.bin'</span><br><span class="line">sudo rpi-eeprom-config pieeprom-2020-06-15.bin &gt; bootconf.txt #读缺省的配置</span><br><span class="line">sudo vi bootconf.txt #把BOOT_ORDER增加2 原来是BOOT_ORDER=0xf41 现在 BOOT_ORDER=0xf241</span><br><span class="line">sudo rpi-eeprom-config --out pieeprom-2020-06-15-netboot.bin --config bootconf.txt pieeprom-2020-06-15.bin</span><br><span class="line">sudo rpi-eeprom-update -d -f ./pieeprom-2020-06-15-netboot.bin</span><br><span class="line">sudo reboot</span><br></pre></td></tr></table></figure>
 <p>当前boot loader的配置和版本</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">root@raspberrypi:~# vcgencmd bootloader_config</span><br><span class="line">[all]</span><br><span class="line">BOOT_UART&#x3D;0</span><br><span class="line">WAKE_ON_GPIO&#x3D;1</span><br><span class="line">POWER_OFF_ON_HALT&#x3D;0</span><br><span class="line">DHCP_TIMEOUT&#x3D;45000</span><br><span class="line">DHCP_REQ_TIMEOUT&#x3D;4000</span><br><span class="line">TFTP_FILE_TIMEOUT&#x3D;30000</span><br><span class="line">ENABLE_SELF_UPDATE&#x3D;1</span><br><span class="line">DISABLE_HDMI&#x3D;0</span><br><span class="line">BOOT_ORDER&#x3D;0xf241</span><br><span class="line">root@raspberrypi:~# vcgencmd bootloader_version</span><br><span class="line">Jun 15 2020 14:36:19</span><br><span class="line">version c302dea096cc79f102cec12aeeb51abf392bd781 (release)</span><br><span class="line">timestamp 1592228179</span><br></pre></td></tr></table></figure>
+<p>boot order的定义可以看：<a href="https://www.raspberrypi.org/documentation/hardware/raspberrypi/bcm2711_bootloader_config.md" target="_blank" rel="noopener">bootloader config</a></p>
+<ul>
+<li>0x0 - NONE (stop with error pattern)</li>
+<li>0x1 - SD CARD</li>
+<li>0x2 - NETWORK</li>
+<li>0x3 - USB device boot usbboot - Compute Module only.</li>
+<li>0x4 - USB mass storage boot</li>
+<li>0xf - RESTART (loop) - start again with the first boot order field.</li>
+</ul>
 </li>
 <li><p>记录一下本机的序列号</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">root@raspberrypi:/# vcgencmd otp_dump | grep 28: | sed s/.*://g</span><br><span class="line">57360526</span><br><span class="line"><span class="meta">#</span><span class="bash">或者用cpuinfo</span></span><br><span class="line">root@raspberrypi:/# cat /proc/cpuinfo</span><br><span class="line">....</span><br><span class="line">Hardware	: BCM2835</span><br><span class="line">Revision	: d03114</span><br><span class="line">Serial		: 1000000057360526 #最后8位</span><br><span class="line">Model		: Raspberry Pi 4 Model B Rev 1.4</span><br></pre></td></tr></table></figure>
