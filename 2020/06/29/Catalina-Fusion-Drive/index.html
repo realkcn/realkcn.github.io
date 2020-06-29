@@ -7,18 +7,26 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://www.kcn.me">
-  <title>Archives: 2020/6 | KCN的主页</title>
+  <title>Catalina Fusion Drive | KCN的主页</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="KCN的主页">
-<meta property="og:url" content="https://www.kcn.me/archives/2020/06/index.html">
+  <meta name="description" content="&amp;#8195;&amp;#8195;我的黑苹果系统盘是NVME固态硬盘，数据盘原来是一块512G的SSD，很快塞满了。把群晖NAS升级8T硬盘退下来的3T西数绿盘拿来做数据盘又担心速度太慢，想起苹果的Fusion drive，就试试看看能不能把数据盘做成Fusion drive。苹果系统升级到Catalina之后，Fusion drive开始支持Apfs，很多教程都不管用了。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Catalina Fusion Drive">
+<meta property="og:url" content="https://www.kcn.me/2020/06/29/Catalina-Fusion-Drive/index.html">
 <meta property="og:site_name" content="KCN的主页">
+<meta property="og:description" content="&amp;#8195;&amp;#8195;我的黑苹果系统盘是NVME固态硬盘，数据盘原来是一块512G的SSD，很快塞满了。把群晖NAS升级8T硬盘退下来的3T西数绿盘拿来做数据盘又担心速度太慢，想起苹果的Fusion drive，就试试看看能不能把数据盘做成Fusion drive。苹果系统升级到Catalina之后，Fusion drive开始支持Apfs，很多教程都不管用了。">
 <meta property="og:locale" content="zh">
+<meta property="og:image" content="https://www.kcn.me/2020/06/29/Catalina-Fusion-Drive/convert-apfs.png">
+<meta property="og:image" content="https://www.kcn.me/2020/06/29/Catalina-Fusion-Drive/DiskSpeedTest-970evo.png">
+<meta property="og:image" content="https://www.kcn.me/2020/06/29/Catalina-Fusion-Drive/DiskSpeedTest-FusionDrive.png">
+<meta property="article:published_time" content="2020-06-29T12:42:51.000Z">
+<meta property="article:modified_time" content="2020-06-29T13:29:55.662Z">
 <meta property="article:author" content="KCN">
 <meta property="article:tag" content="kbs">
 <meta property="article:tag" content="smth">
 <meta property="article:tag" content="KCN">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.kcn.me/2020/06/29/Catalina-Fusion-Drive/convert-apfs.png">
   
     <link rel="alternative" href="/atom.xml" title="KCN的主页" type="application/atom+xml">
   
@@ -148,103 +156,153 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
+            <article id="post-Catalina-Fusion-Drive" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
   
+    <h1 class="article-title" itemprop="name">
+      Catalina Fusion Drive
+    </h1>
   
-    
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2020" class="archive-year">2020</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2020/06/29/Catalina-Fusion-Drive/" class="archive-article-date">
+
+        
+        <a href="/2020/06/29/Catalina-Fusion-Drive/" class="archive-article-date">
   	<time datetime="2020-06-29T12:42:51.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-06-29</time>
 </a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/06/29/Catalina-Fusion-Drive/">Catalina Fusion Drive</a>
-    </h1>
-  
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>&#8195;&#8195;我的黑苹果系统盘是NVME固态硬盘，数据盘原来是一块512G的SSD，很快塞满了。把群晖NAS升级8T硬盘退下来的3T西数绿盘拿来做数据盘又担心速度太慢，想起苹果的Fusion drive，就试试看看能不能把数据盘做成Fusion drive。苹果系统升级到Catalina之后，Fusion drive开始支持Apfs，很多教程都不管用了。</p>
+<!--toc-->
+<a id="more"></a>
 
-        <div class="article-info info-on-right">
-          
-          
+<h1><span id="准备工作">准备工作</span></h1><p>&#8195;&#8195;创建Fusion drive需要2块盘，一块定义为快速盘，一般是SSD固态硬盘，一块定义为Designated Aux Use，一般是机械硬盘。创建会抹去盘上的内容，请先备份好数据。</p>
+<p>&#8195;&#8195;两块盘都需要是内置硬盘，可以用diskutil list查看</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">/dev/disk1 (internal, physical):</span><br><span class="line"><span class="meta">   #</span><span class="bash">:                       TYPE NAME                    SIZE       IDENTIFIER</span></span><br><span class="line">   0:      GUID_partition_scheme                        *500.1 GB   disk1</span><br><span class="line">   1:                        EFI EFI                     209.7 MB   disk1s1</span><br><span class="line">   2:                 Apple_APFS Container disk7         499.8 GB   disk1s2</span><br><span class="line"></span><br><span class="line">/dev/disk5 (internal, physical):</span><br><span class="line"><span class="meta">   #</span><span class="bash">:                       TYPE NAME                    SIZE       IDENTIFIER</span></span><br><span class="line">   0:      GUID_partition_scheme                        *3.0 TB     disk5</span><br><span class="line">   1:                        EFI EFI                     209.7 MB   disk5s1</span><br><span class="line">   2:                 Apple_APFS Container disk7         3.0 TB     disk5s2</span><br></pre></td></tr></table></figure>
+<p>disk后面有internal, physical就对了</p>
+<h1><span id="创建fusion">创建Fusion</span></h1><p>  用diskutil list确定用来做fusion drive的两块盘的盘号，我的就是/dev/disk1 /dev/disk5</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> diskutil coreStorage create fusion /dev/disk1 /dev/disk5 <span class="comment">#这里盘符可能有顺序要求，SSD在前</span></span></span><br><span class="line">Core Storage LVG UUID: 54ACD5EA-0E03-419A-8286-F405C6F01570</span><br><span class="line"><span class="meta">#</span><span class="bash"> diskutil coreStorage createVolume 54ACD5EA-0E03-419A-8286-F405C6F01570 jhfs+ MacData 100% <span class="comment"># 这里MacData是我用的盘符，中间那串数字是上面创建cs的UUID</span></span></span><br></pre></td></tr></table></figure>
+<p>  稍微等一会，就创建完了。可以重启一下确认能看到这块Fusion Drive</p>
+<h1><span id="转成apfs">转成Apfs</span></h1><p>  这个用Diskutil（磁盘工具）转就行了。</p>
+  <img src="/2020/06/29/Catalina-Fusion-Drive/convert-apfs.png" class title="convert-apfs">
 
+<p>   转完之后就能用了。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> diskutil apfs list</span></span><br><span class="line">APFS Containers (2 found)</span><br><span class="line">|</span><br><span class="line">+-- Container disk3 DE7A8C62-065C-4E2B-9D76-202932EE0307</span><br><span class="line">|   ====================================================</span><br><span class="line">|   APFS Container Reference:     disk3</span><br><span class="line">|   Size (Capacity Ceiling):      499898105856 B (499.9 GB)</span><br><span class="line">|   Capacity In Use By Volumes:   361652838400 B (361.7 GB) (72.3% used)</span><br><span class="line">|   Capacity Not Allocated:       138245267456 B (138.2 GB) (27.7% free)</span><br><span class="line">|   这个是我的系统盘</span><br><span class="line">....</span><br><span class="line">   这是Fusion drive</span><br><span class="line">+-- Container disk7 54ACD5EA-0E03-419A-8286-F405C6F01570</span><br><span class="line">    ====================================================</span><br><span class="line">    APFS Container Reference:     disk7 (Fusion)</span><br><span class="line">    Size (Capacity Ceiling):      3500147113984 B (3.5 TB)</span><br><span class="line">    Capacity In Use By Volumes:   276260708352 B (276.3 GB) (7.9% used)</span><br><span class="line">    Capacity Not Allocated:       3223886405632 B (3.2 TB) (92.1% free)</span><br><span class="line">    |</span><br><span class="line">    +-&lt; Physical Store disk1s2 D872C3B7-820C-4070-B443-E3A5F46F7A6A</span><br><span class="line">    |   -----------------------------------------------------------</span><br><span class="line">    |   APFS Physical Store Disk:   disk1s2 (Main, "Faster" Disk Use)</span><br><span class="line">    |   Size:                       499763888128 B (499.8 GB)</span><br><span class="line">    |</span><br><span class="line">    +-&lt; Physical Store disk5s2 ACF0D060-9A2E-4559-AA0C-AF52612891C7</span><br><span class="line">    |   -----------------------------------------------------------</span><br><span class="line">    |   APFS Physical Store Disk:   disk5s2 (Secondary, Designated Aux Use)</span><br><span class="line">    |   Size:                       3000383225856 B (3.0 TB)</span><br><span class="line">    |</span><br><span class="line">    +-&gt; Volume disk7s1 313C79B1-B310-32CD-932C-2CD788E8801B</span><br><span class="line">        ---------------------------------------------------</span><br><span class="line">        APFS Volume Disk (Role):   disk7s1 (No specific role)</span><br><span class="line">        Name:                      MacData (Case-insensitive)</span><br><span class="line">        Mount Point:               /Volumes/MacData</span><br><span class="line">        Capacity Consumed:         267227234304 B (267.2 GB)</span><br><span class="line">        FileVault:                 No</span><br></pre></td></tr></table></figure>
+
+<h1><span id="测速">测速</span></h1><p>&nbsp;&nbsp;比起系统盘慢好多……<br>   Samsung 970 EVO:<br>  <img src="/2020/06/29/Catalina-Fusion-Drive/DiskSpeedTest-970evo.png" class title="speed-970evo"></p>
+<p>   Fusion Drive (Samsung 870 500G + WD Green Drive 3T)<br>  <img src="/2020/06/29/Catalina-Fusion-Drive/DiskSpeedTest-FusionDrive.png" class title="speed-fusion"></p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+      
+
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=https://www.kcn.me/2020/06/29/Catalina-Fusion-Drive/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2020/06/25/Raspberry-upgrade-64bit/" class="archive-article-date">
-  	<time datetime="2020-06-25T02:54:34.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-06-25</time>
-</a>
+<nav id="article-nav">
+  
+  
+    <a href="/2020/06/25/Raspberry-upgrade-64bit/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">64位Raspberry OS</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
+        
+        
+    </div>
+</aside>
+
+
+
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/06/25/Raspberry-upgrade-64bit/">64位Raspberry OS</a>
-    </h1>
+  
   
 
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2020/06/21/Raspberry-pi-4b-pxe-network-boot/" class="archive-article-date">
-  	<time datetime="2020-06-20T16:15:54.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-06-21</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/06/21/Raspberry-pi-4b-pxe-network-boot/">Raspberry pi无盘网络启动(network booting)</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
   
 
-    
+  
 
 
           </div>
@@ -267,8 +325,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: true,
